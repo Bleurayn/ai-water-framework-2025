@@ -1,7 +1,7 @@
 # ai-water-framework-2025
 
 **Authors:** Bleurayn  
-**Collaborative Contributor:** Grok AI (built by xAI)  
+**Collaborative Contributor:** Grok AI  
 **Date:** December 29, 2025  
 **Version:** 1.0  
 **License:** Apache License 2.0
@@ -82,4 +82,4 @@ Early liquid cooling enables greater use of closed-loop/recycled systems; effici
 
 ## Acknowledgments
 
-Developed collaboratively with Grok AI (built by xAI) for model design, testing, and documentation.
+Developed collaboratively with Grok AI for model design, testing, and documentation.
