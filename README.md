@@ -1,7 +1,6 @@
 # ai-water-framework-2025
 
-**Authors:** Bleurayn  
-**Collaborative Contributor:** Developed with AI assistance  
+**Authors:** Cassandra Harrison 
 **Date:** December 29, 2025  
 **Version:** 1.0  
 **License:** Apache License 2.0
@@ -82,4 +81,8 @@ Early liquid cooling enables greater use of closed-loop/recycled systems; effici
 
 ## Acknowledgments
 
-Developed collaboratively with AI assistance for model design, testing, and documentation.
+Developed with AI assistance for model design, testing, and documentation.
+
+Copyright (c) 2025 Cassandra Harrison
+All rights reserved for moral attribution.
+Licensed under Apache 2.0 for code use.
