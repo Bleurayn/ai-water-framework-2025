@@ -1,0 +1,100 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Time horizon
+years = np.arange(2025, 2051)
+n_years = len(years)
+
+# Baseline 2025 AI-related water use (billion liters/year, total ~500B, ~40% potable/direct)
+total_baseline = 500.0
+potable_fraction_baseline = 0.4
+potable_baseline = total_baseline * potable_fraction_baseline  # ~200B liters potable
+
+# AI growth: exponential to 2035, then linear (conservative)
+growth_rate_early = 1.25  # 25% annual growth 2025-2035
+growth_rate_late = 1.10   # 10% after
+total_water_bau = total_baseline * np.cumprod(np.where(years <= 2035, growth_rate_early, growth_rate_late))
+
+# Pathways
+# 1. Liquid/immersion cooling adoption (S-curve to 70% by 2040, reduces evaporation 70% avg)
+midpoint_liq = 2035
+steepness_liq = 0.3
+max_liq = 0.7
+liq_fraction = max_liq / (1 + np.exp(-steepness_liq * (years - midpoint_liq)))
+liq_reduction = liq_fraction * 0.7  # 70% avg water saving from evaporation
+
+# 2. Non-potable/recycled shift (to 80% by 2050)
+max_nonpot = 0.8
+nonpot_fraction = max_nonpot / (1 + np.exp(-0.25 * (years - 2040)))
+
+# 3. Dry/efficiency bonus (20% facilities zero-water)
+dry_fraction = np.minimum(0.2, (years - 2025) / 25 * 0.2)
+
+# Combined reduction factor on potable demand
+combined_reduction = liq_reduction + (1 - liq_fraction) * nonpot_fraction * 0.8 + dry_fraction
+
+# Potable demand
+potable_demand = total_water_bau * potable_fraction_baseline * (1 - combined_reduction)
+
+# Savings vs BAU (no interventions)
+potable_bau = total_water_bau * potable_fraction_baseline
+savings = potable_bau - potable_demand
+
+# Cumulative savings
+cumulative_savings = np.cumsum(savings)
+
+# Monte Carlo (100 runs)
+np.random.seed(42)
+n_sim = 100
+cum_savings_mc = np.zeros((n_sim, n_years))
+for i in range(n_sim):
+    growth_var = np.random.uniform(1.20, 1.30, n_years - 11)  # early variation
+    growth_var_late = np.random.uniform(1.05, 1.15, 11)
+    total_var = total_baseline * np.cumprod(np.concatenate([np.ones(11) * growth_var, growth_var_late]))
+    liq_max_var = np.random.uniform(0.6, 0.8)
+    liq_frac_var = liq_max_var / (1 + np.exp(-steepness_liq * (years - midpoint_liq)))
+    nonpot_var = np.random.uniform(0.7, 0.9)
+    nonpot_frac_var = nonpot_var / (1 + np.exp(-0.25 * (years - 2040)))
+    red_var = (liq_frac_var * 0.7 + (1 - liq_frac_var) * nonpot_frac_var * 0.8 + dry_fraction)
+    potable_var = total_var * potable_fraction_baseline * (1 - red_var)
+    savings_var = total_var * potable_fraction_baseline - potable_var
+    cum_savings_mc[i] = np.cumsum(savings_var)
+
+cum_mean = np.mean(cum_savings_mc, axis=0)
+cum_std = np.std(cum_savings_mc, axis=0)
+cum_low = cum_mean - cum_std
+cum_high = cum_mean + cum_std
+
+# Plot 1: Stacked annual savings
+plt.figure(figsize=(12, 7))
+plt.stackplot(years, liq_reduction * potable_bau, nonpot_fraction * (1 - liq_fraction) * potable_bau * 0.8, dry_fraction * potable_bau,
+              labels=['Liquid/Immersion Cooling', 'Non-Potable Shift', 'Dry/Efficiency Bonus'],
+              colors=['#4682B4', '#87CEEB', '#ADD8E6'])
+plt.plot(years, savings, label='Total Annual Savings', color='black', linewidth=3)
+plt.xlabel('Year')
+plt.ylabel('Billion Liters Potable Water Saved/Year')
+plt.title('Annual Potable Water Savings Pathways')
+plt.legend(loc='upper left')
+plt.grid(True, alpha=0.3)
+plt.savefig('annual_water_savings.png')
+plt.close()
+
+# Plot 2: Cumulative savings with uncertainty
+plt.figure(figsize=(10, 6))
+plt.plot(years, cum_mean / 1000, label='Mean Cumulative Savings (Trillion Liters)', color='darkblue', linewidth=3)
+plt.fill_between(years, cum_low / 1000, cum_high / 1000, color='blue', alpha=0.3, label='±1σ Uncertainty')
+plt.xlabel('Year')
+plt.ylabel('Trillion Liters Potable Water Saved')
+plt.title('Cumulative Potable Water Conservation (2025–2050)')
+plt.legend()
+plt.grid(True)
+plt.savefig('cumulative_water_savings.png')
+plt.close()
+
+# Print results
+print("AI Water Conservation Framework Results")
+print("=====================================")
+print(f"2030: Annual savings ~{savings[years == 2030][0]:.0f}B liters")
+print(f"2040: Annual savings ~{savings[years == 2040][0]:.0f}B liters")
+print(f"2050: Annual savings ~{savings[-1]:.0f}B liters | Cumulative ~{cum_mean[-1]/1000:.1f} trillion liters (±{cum_std[-1]/1000:.1f})")
+print("\nPlots generated: annual_water_savings.png & cumulative_water_savings.png")
