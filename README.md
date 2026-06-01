@@ -1,7 +1,5 @@
 # ai-water-framework-2025
 
-# ai-water-framework-2025
-
 **Authors:** Cassandra Harrison  
 **Date:** December 29, 2025 (Updated)  
 **Version:** 2.0  
