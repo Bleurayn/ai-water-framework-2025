@@ -332,3 +332,9 @@ plt.close()
 print("\n✓ All gaps closed. Plots saved: plant_cumulative_water_savings_full.png & plant_opex_savings_full.png")
 print("\nNext step for your plant: Replace the 'plant_config' dictionary with your actual facility data.")
 print("Required data: cooling load (MWh/year), current water use (L/kWh), local wet-bulb temperature, water/energy prices.")
+
+try:
+    from plant_config_local import plant_config
+except ImportError:
+    from plant_config_sample import plant_config
+    print("WARNING: Using sample data. Create plant_config_local.py with real data.")
